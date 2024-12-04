@@ -1,10 +1,9 @@
 {
     "compilerOptions": {
-      // Allows TypeScript to import from packages that use different module systems
+      "composite": true,
       "module": "ESNext",
-      // Helps with importing packages that aren't written in TypeScript
+      "moduleResolution": "node",
       "allowSyntheticDefaultImports": true
     },
-    // Only includes the Vite config file
     "include": ["vite.config.ts"]
   }
