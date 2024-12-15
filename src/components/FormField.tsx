@@ -1,5 +1,4 @@
-// src/components/FormField.tsx
-import React from "react";
+import React, { ReactNode } from 'react';
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Check, AlertCircle } from "lucide-react";
 

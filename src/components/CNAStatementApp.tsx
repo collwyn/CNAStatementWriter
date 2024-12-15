@@ -1,10 +1,15 @@
+// React and hooks
 import React, { useState, useEffect } from "react";
-import { generateStatement } from "./StatementGenerator";
+
+// Local components
 import FormField from "./FormField";
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { Alert, AlertDescription } from "./ui/alert";
+
+// Statement generators
+import { generateStatement } from "./StatementGenerator";
+import { generateAIStatement } from "../utils/aiService";
+//import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import {
-  ChevronDown,
-  Globe,
   ArrowLeft,
   ArrowRight,
   Loader,
@@ -14,6 +19,10 @@ import {
   translateText,
 } from "../utils/translationService";
 
+interface FormErrors {
+  [key: string]: string | undefined;
+  translation?: string;
+}
 interface Language {
   code: string;
   name: string;
@@ -62,32 +71,29 @@ interface FormData {
   incidentTime: string;
   incidentType: string;
   incidentDescription: string;
-  patientInjuries: string; // Add this new field
-  patientStatement?: string; // Optional field for patient's description
+  patientInjuries: string;
+  patientStatement?: string;
   fallDetails: {
     location: string;
     cause: string;
     injuries: string;
   };
+  aiGeneratedStatement?: string; // Add this line
 }
 
-interface FormErrors {
-  [key: string]: string;
-  translation?: string;
-}
 
-interface StatementGeneratorProps {
-  formData: FormData;
-}
+//interface StatementGeneratorProps {
+// formData: FormData;
+//}
 
-interface TranslationService {
-  getAvailableLanguages: () => Promise<Language[]>;
-  translateText: (
-    text: string,
-    fromLang: string,
-    toLang: string
-  ) => Promise<string>;
-}
+//interface TranslationService {
+  //getAvailableLanguages: () => Promise<Language[]>;
+  //translateText: (
+   // text: string,
+  //  fromLang: string,
+  //  toLang: string
+ // ) => Promise<string>;
+//}
 
 const defaultTranslations: Translations = {
   en: {
@@ -275,7 +281,7 @@ function CNAStatementApp() {
         ];
 
         const existingLanguageCodes = new Set(
-          apiLanguages.map((lang) => lang.code)
+          apiLanguages.map((lang: Language) => lang.code)
         );
 
         const mergedLanguages = [...apiLanguages];
@@ -315,20 +321,24 @@ function CNAStatementApp() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ): void => {
     const { name, value } = e.target;
     if (name.includes(".")) {
       const [parent, child] = name.split(".");
-      setFormData((prev: FormData) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent as keyof FormData],
-          [child]: value,
-        },
-      }));
+      if (
+        parent in formData && 
+        typeof formData[parent as keyof FormData] === 'object' &&
+        formData[parent as keyof FormData] !== null
+      ) {
+        setFormData((prev: FormData) => ({
+          ...prev,
+          [parent]: {
+            ...((prev[parent as keyof FormData]) as object),
+            [child]: value,
+          },
+        }));
+      }
     } else {
       setFormData((prev: FormData) => ({
         ...prev,
@@ -339,13 +349,11 @@ function CNAStatementApp() {
 
   const handleGenerateStatement = async () => {
     if (!validateStep4()) {
-      console.log("Step 4 validation failed");
       return;
     }
   
     setIsLoading(true);
     try {
-      console.log("Generating statement with data:", formData);
       if (inputLanguage !== "en") {
         const translatedData = {
           ...formData,
@@ -382,16 +390,16 @@ function CNAStatementApp() {
             ),
           },
         };
-        console.log("Translated data:", translatedData);
-        setFinalStatement(translatedData);
+        const aiStatement = await generateAIStatement(translatedData);
+        setFinalStatement({...translatedData, aiGeneratedStatement: aiStatement});
       } else {
-        console.log("Setting final statement with original data");
-        setFinalStatement(formData);
+        const aiStatement = await generateAIStatement(formData);
+        setFinalStatement({...formData, aiGeneratedStatement: aiStatement});
       }
     } catch (error) {
-      console.error("Translation error:", error);
+      console.error("Error generating statement:", error);
       setErrors({
-        translation: "Error translating statement. Please try again.",
+        translation: "Error generating statement. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -588,14 +596,7 @@ function CNAStatementApp() {
   );
 
   const renderFinalStatement = () => {
-    console.log("Rendering final statement:", finalStatement);
-    if (!finalStatement) {
-      console.log("No final statement available");
-      return null;
-    }
-  
-    const generatedStatement = generateStatement(finalStatement);
-    console.log("Generated statement:", generatedStatement);
+    if (!finalStatement) return null;
   
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
@@ -603,7 +604,7 @@ function CNAStatementApp() {
           <h2 className="text-xl font-bold mb-4">Generated Statement</h2>
           <div className="prose max-w-none">
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {generatedStatement}
+              {finalStatement.aiGeneratedStatement || generateStatement(finalStatement)}
             </p>
           </div>
           <div className="mt-6 flex justify-end">
@@ -666,7 +667,6 @@ function CNAStatementApp() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      {console.log("Rendering component, finalStatement:", finalStatement)}
       <header className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
         <select
