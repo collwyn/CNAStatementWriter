@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { generateStatement } from "./StatementGenerator";
+import AdBanner from "./AdBanner";
 import FormField from "./FormField";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import {
@@ -681,45 +682,63 @@ function CNAStatementApp() {
           ))}
         </select>
       </header>
-
-      <main className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-sm">
-        <div className="mb-6 text-center">
-          <span className="text-sm font-medium text-gray-500">
-            {t.step} {currentStep} {t.of} 4
-          </span>
+  
+      <main className="max-w-2xl mx-auto">
+        {/* Top Ad Banner */}
+        <AdBanner 
+          position="top" 
+          imageUrl="/path/to/your/banner-image.jpg" 
+          linkUrl="https://your-ad-link.com" 
+          altText="Special offer for healthcare professionals" 
+        />
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="mb-6 text-center">
+            <span className="text-sm font-medium text-gray-500">
+              {t.step} {currentStep} {t.of} 4
+            </span>
+          </div>
+  
+          {currentStep === 1 && renderStep1()}
+          {currentStep === 2 && renderStep2()}
+          {currentStep === 3 && renderStep3()}
+          {currentStep === 4 && renderStep4()}
+  
+          <div className="mt-8 flex justify-between">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className={`px-4 py-2 rounded-md flex items-center ${
+                currentStep === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+              }`}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {t.previous}
+            </button>
+  
+            {renderActionButton()}
+          </div>
+  
+          {errors.translation && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{errors.translation}</AlertDescription>
+            </Alert>
+          )}
         </div>
-
-        {currentStep === 1 && renderStep1()}
-        {currentStep === 2 && renderStep2()}
-        {currentStep === 3 && renderStep3()}
-        {currentStep === 4 && renderStep4()}
-
-        <div className="mt-8 flex justify-between">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className={`px-4 py-2 rounded-md flex items-center ${
-              currentStep === 1
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-blue-50 text-blue-600 hover:bg-blue-100"
-            }`}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {t.previous}
-          </button>
-
-          {renderActionButton()}
-        </div>
-
-        {errors.translation && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertDescription>{errors.translation}</AlertDescription>
-          </Alert>
-        )}
+        
+        {/* Bottom Ad Banner */}
+        <AdBanner 
+          position="bottom" 
+          imageUrl="/path/to/your/second-banner-image.jpg" 
+          linkUrl="https://your-second-ad-link.com" 
+          altText="Nursing supplies discount"
+        />
       </main>
       {finalStatement && renderFinalStatement()}
     </div>
   );
-}
-
-export default CNAStatementApp;
+  }
+  
+  export default CNAStatementApp;
