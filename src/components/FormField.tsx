@@ -1,10 +1,10 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { Alert, AlertDescription } from "../components/ui/alert";
 import { Check, AlertCircle } from "lucide-react";
 
 interface FormFieldProps {
   label: string;
-  name: string; // Kept for interface consistency
+  name: string; // We need to keep this in the interface for component API consistency
   error?: string;
   value?: string;
   children: React.ReactNode;
@@ -12,7 +12,7 @@ interface FormFieldProps {
 
 const FormField: React.FC<FormFieldProps> = ({
   label,
-  // name is removed from the function params to resolve the TypeScript error
+  name: _, // Rename to underscore to mark as intentionally unused
   error,
   value,
   children,
