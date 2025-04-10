@@ -5,16 +5,15 @@ import { Check, AlertCircle } from "lucide-react";
 
 interface FormFieldProps {
   label: string;
-  name: string; // We'll keep this for consistency with how it's used
+  name: string; // Kept for interface consistency
   error?: string;
   value?: string;
-  children: React.ReactNode; // Fix: Changed ReactNode to React.ReactNode
+  children: React.ReactNode;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
   label,
-  // name parameter is kept in the argument list but commented out to show it's intentionally unused
-  // name,
+  // name is removed from the function params to resolve the TypeScript error
   error,
   value,
   children,
