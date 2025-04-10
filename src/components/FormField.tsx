@@ -5,15 +5,16 @@ import { Check, AlertCircle } from "lucide-react";
 
 interface FormFieldProps {
   label: string;
-  name: string;
+  name: string; // We'll keep this for consistency with how it's used
   error?: string;
   value?: string;
-  children: ReactNode;
+  children: React.ReactNode; // Fix: Changed ReactNode to React.ReactNode
 }
 
 const FormField: React.FC<FormFieldProps> = ({
   label,
-  name,
+  // name parameter is kept in the argument list but commented out to show it's intentionally unused
+  // name,
   error,
   value,
   children,
