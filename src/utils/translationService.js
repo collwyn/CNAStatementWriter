@@ -1,7 +1,15 @@
-const LIBRE_TRANSLATE_API = "https://libretranslate.com/translate";
+// src/utils/translationService.js
+// Use an environment variable or fallback to a placeholder during development
+const LIBRE_TRANSLATE_API = process.env.REACT_APP_TRANSLATE_API_URL || "https://example-translate-api.com/translate";
 
 export const translateText = async (text, sourceLang, targetLang) => {
   try {
+    // For testing without the actual API, return the original text
+    if (LIBRE_TRANSLATE_API === "https://example-translate-api.com/translate") {
+      console.log("Using placeholder translation service - returning original text");
+      return text; // Return original text for testing
+    }
+    
     const response = await fetch(LIBRE_TRANSLATE_API, {
       method: "POST",
       body: JSON.stringify({
@@ -13,56 +21,27 @@ export const translateText = async (text, sourceLang, targetLang) => {
     });
     
     const data = await response.json();
-    return data.translatedText;
+    return data.translatedText || text;
   } catch (error) {
     console.error("Translation error:", error);
     return text; // Return original text if translation fails
   }
 };
 
-// Function to translate form data to English
-export const translateFormToEnglish = async (formData, sourceLang) => {
-  if (sourceLang === 'en') return formData; // No translation needed
-
-  let translatedData = { ...formData };
-  
-  // Translate main fields
-  for (const key of ['incidentDescription', 'assistingPerson']) {
-    if (formData[key]) {
-      translatedData[key] = await translateText(formData[key], sourceLang, 'en');
-    }
-  }
-  
-  // Translate nested fields based on incident type
-  if (formData.incidentType === 'fall') {
-    for (const key of ['location', 'cause', 'injuries']) {
-      if (formData.fallDetails[key]) {
-        translatedData.fallDetails[key] = await translateText(
-          formData.fallDetails[key], 
-          sourceLang, 
-          'en'
-        );
-      }
-    }
-  } else if (formData.incidentType === 'medicalEmergency') {
-    for (const key of ['symptoms', 'vitalSigns', 'actionTaken']) {
-      if (formData.medicalEmergencyDetails[key]) {
-        translatedData.medicalEmergencyDetails[key] = await translateText(
-          formData.medicalEmergencyDetails[key], 
-          sourceLang, 
-          'en'
-        );
-      }
-    }
-  }
-  
-  return translatedData;
-};
-
 // Function to get available languages
 export const getAvailableLanguages = async () => {
   try {
-    const response = await fetch("https://libretranslate.com/languages");
+    // For testing without the API
+    if (LIBRE_TRANSLATE_API === "https://example-translate-api.com/translate") {
+      console.log("Using placeholder language service");
+      return [
+        { code: 'en', name: 'English' },
+        { code: 'es', name: 'Spanish' },
+        { code: 'ht', name: 'Haitian Creole' }
+      ];
+    }
+    
+    const response = await fetch(LIBRE_TRANSLATE_API.replace("/translate", "/languages"));
     const languages = await response.json();
     return languages.map(lang => ({
       code: lang.code,

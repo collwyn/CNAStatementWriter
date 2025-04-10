@@ -4,15 +4,15 @@ import { Check, AlertCircle } from "lucide-react";
 
 interface FormFieldProps {
   label: string;
-  name: string;
+  name: string; // Kept for interface consistency
   error?: string;
   value?: string;
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const FormField: React.FC<FormFieldProps> = ({
   label,
-  name,
+  // name is removed from the function params to resolve the TypeScript error
   error,
   value,
   children,
